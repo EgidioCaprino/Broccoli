@@ -19,6 +19,12 @@ func main() {
 	if err != nil {
 		log.Fatalln("Unable to open file", filename, err)
 	}
+	var crypt func([]byte, []byte)
+	if operation == Encrypt {
+		crypt = cipher.Encrypt
+	} else {
+		crypt = cipher.Decrypt
+	}
 	source := make([]byte, cipher.BlockSize())
 	for count, err := file.Read(source); count > 0; count, err = file.Read(source) {
 		if err != nil {
@@ -26,11 +32,7 @@ func main() {
 			log.Fatalln("Unable to read file", filename, err)
 		}
 		destination := make([]byte, cipher.BlockSize())
-		if operation == Encrypt {
-			cipher.Encrypt(destination, source)
-		} else {
-			cipher.Decrypt(destination, source)
-		}
+		crypt(destination, source)
 		os.Stdout.Write(destination)
 	}
 	file.Close()
